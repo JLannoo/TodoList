@@ -1,0 +1,10 @@
+{
+  "Name": "TodoList",
+  "Author": "JLannoo",
+  "Version": "1.0.0",
+  "Description": "Allows you to create a to-do list",
+  "UniqueID": "JLannoo.TodoList",
+  "EntryDll": "TodoList.dll",
+  "MinimumApiVersion": "3.0.0",
+  "UpdateKeys": []
+}
