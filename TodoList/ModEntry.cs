@@ -1,7 +1,6 @@
 ﻿using StardewModdingAPI;
 using StardewValley;
-
-using TodoList.UI;
+using TodoList.UI.Menus;
 
 namespace TodoList;
 
@@ -16,8 +15,8 @@ internal class ModEntry : Mod {
 
     #region Events
     private void OnButtonPressed(object? sender, StardewModdingAPI.Events.ButtonPressedEventArgs e) {
-        if(e.Button == SButton.L) {
-            if(Game1.activeClickableMenu is TodoMenu todoMenu) {
+        if (e.Button == SButton.L) {
+            if (Game1.activeClickableMenu is TodoMenu todoMenu) {
                 todoMenu.exitThisMenu();
             } else {
                 Game1.activeClickableMenu = new TodoMenu();
