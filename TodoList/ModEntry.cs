@@ -6,9 +6,13 @@ namespace TodoList;
 
 internal class ModEntry : Mod {
     public static IMonitor monitor;
+    public static IModHelper modHelper;
+    
+    public static TodoMenu menu;
 
     public override void Entry(IModHelper helper) {
         monitor = Monitor;
+        modHelper = helper;
 
         helper.Events.Input.ButtonPressed += OnButtonPressed;
     }
@@ -16,10 +20,11 @@ internal class ModEntry : Mod {
     #region Events
     private void OnButtonPressed(object? sender, StardewModdingAPI.Events.ButtonPressedEventArgs e) {
         if (e.Button == SButton.L) {
-            if (Game1.activeClickableMenu is TodoMenu todoMenu) {
-                todoMenu.exitThisMenu();
+            if (Game1.activeClickableMenu is TodoMenu) {
+                menu.exitThisMenu();
             } else {
-                Game1.activeClickableMenu = new TodoMenu();
+                menu = new TodoMenu();
+                Game1.activeClickableMenu = menu;
             }
         }
     }

@@ -5,7 +5,6 @@ using StardewValley.Menus;
 using TodoList.Extensions;
 using TodoList.UI.Components;
 using xTile.Dimensions;
-using static StardewValley.Menus.CoopMenu;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace TodoList.UI.Menus;
@@ -50,28 +49,28 @@ public class TodoMenu : IClickableMenu {
             scale,
             drawShadow: true
         ));
-        tabs[0].items.Add(new("Item 1"));
-        tabs[0].items.Add(new("Item 2"));
-        tabs[0].items.Add(new("Item 3"));
-        tabs[0].items.Add(new("Item 4"));
-        tabs[0].items.Add(new("Item 5"));
-        tabs[0].items.Add(new("Item 6"));
-        tabs[0].items.Add(new("Item 7"));
+        tabs[0].items.Add(new(tabs[0], "Item 1"));
+        tabs[0].items.Add(new(tabs[0], "Item 2"));
+        tabs[0].items.Add(new(tabs[0], "Item 3"));
+        tabs[0].items.Add(new(tabs[0], "Item 4"));
+        tabs[0].items.Add(new(tabs[0], "Item 5"));
+        tabs[0].items.Add(new(tabs[0], "Item 6"));
+        tabs[0].items.Add(new(tabs[0], "Item 7"));
 
         tabs.Add(new TodoTab(
             "2",
             new Rectangle(tabAnchorPoint + new Point(0, TodoTab.tabSize.Y * tabs.Count).Multiply(scale), TodoTab.tabSize.Multiply(scale)),
             "",
-            "Tab 2l",
+            "Tab 2",
             Game1.mouseCursors,
             new Rectangle(688, 64, 16, 16),
             scale,
             drawShadow: true
         ));
-        tabs[1].items.Add(new("Item 1"));
-        tabs[1].items.Add(new("Item 2"));
-        tabs[1].items.Add(new("Item 3"));
-        tabs[1].items.Add(new("Item 4"));
+        tabs[1].items.Add(new(tabs[1], "Item 1"));
+        tabs[1].items.Add(new(tabs[1], "Item 2"));
+        tabs[1].items.Add(new(tabs[1], "Item 3"));
+        tabs[1].items.Add(new(tabs[1], "Item 4"));
     }
 
     #region Methods
@@ -107,7 +106,10 @@ public class TodoMenu : IClickableMenu {
             }
         }
 
+        Utils.DrawTextWithBox(b, new Vector2(xPositionOnScreen + size.Width/2, yPositionOnScreen + spaceToClearTopBorder), currentTab.hoverText, Game1.dialogueFont, new Vector2(30, 15), true);
+
         drawMouse(b);
+        drawHoverText(b, hoverText, Game1.smallFont);
     }
 
     public override void receiveLeftClick(int x, int y, bool playSound = true) {
@@ -125,7 +127,7 @@ public class TodoMenu : IClickableMenu {
             }
         }
 
-        foreach (TodoItem item in currentTab.items) {
+        foreach (TodoItem item in currentTab.items.ToList()) {
             item.receiveLeftClick(x, y);
         }
     }
@@ -137,6 +139,12 @@ public class TodoMenu : IClickableMenu {
             if (tab.containsPoint(x, y)) {
                 hoverText = tab.hoverText;
             }
+        }
+
+        if (currentTab == null) return;
+
+        foreach(var item in currentTab.items) {
+            item.tryHover(x, y);
         }
     }
 
@@ -153,8 +161,7 @@ public class TodoMenu : IClickableMenu {
 
             Vector2 pos = itemsAnchorPoint.ToVector2() + currentDisplacement;
 
-            item.position = pos;
-            item.updateBounds(pos.ToPoint());
+            item.updatePosition(pos);
             item.draw(b);
 
             currentDisplacement += new Vector2(0, item.textSize.Y);

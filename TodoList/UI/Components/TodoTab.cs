@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewValley;
 using StardewValley.Menus;
 
 namespace TodoList.UI.Components;
@@ -17,5 +18,10 @@ public class TodoTab : ClickableTextureComponent {
 
     public override void draw(SpriteBatch b) {
         base.draw(b, Color.White, 1, xOffset: active ? 10 : 0);
+    }
+
+    public void deleteItem(int index) {
+        items.Remove(items.Find(i => i.index == index));
+        Game1.playSound("trashcan");
     }
 }
