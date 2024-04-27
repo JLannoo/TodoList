@@ -26,7 +26,7 @@ public class CreateTab : ClickableTextureComponent {
                 new Point(64)
             ),
             Game1.mouseCursors,
-            new Rectangle(16, 369, 16, 15),
+            new Rectangle(16, 368, 16, 16),
             4f
         );
 
@@ -53,7 +53,7 @@ public class CreateTab : ClickableTextureComponent {
             1
         );
 
-        plusSign.draw(b, Color.White, 1, 0, 12, 10);
+        plusSign.draw(b, Color.White, 1, 0, 17, 10);
     }
 
     new public void setPosition(Vector2 position) {
