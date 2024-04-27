@@ -2,18 +2,35 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Menus;
+using static StardewValley.Menus.CoopMenu;
+using TodoList.Extensions;
+using TodoList.UI.Menus;
 
 namespace TodoList.UI.Components;
 
 public class TodoTab : ClickableTextureComponent {
     public static readonly Point tabSize = new(16, 16);
+    public static readonly float Scale = 4f;
 
     public readonly List<TodoItem> items = new();
+    public readonly TodoMenu parentMenu;
+    public readonly int index;
 
     public bool active = false;
 
-    public TodoTab(string name, Rectangle bounds, string label, string hoverText, Texture2D texture, Rectangle sourceRect, float scale, bool drawShadow = false) : base(name, bounds, label, hoverText, texture, sourceRect, scale, drawShadow) {
-
+    public TodoTab(TodoMenu parentMenu, Vector2 position, string name, TabIconNames icon)
+    : base(
+        name,
+        new Rectangle(position.ToPoint(), tabSize.Multiply(Scale)),
+        "",
+        name,
+        Game1.mouseCursors,
+        TodoMenu.TabIconsSourceRects[icon],
+        Scale,
+        drawShadow: true
+    ) {
+        this.parentMenu = parentMenu;
+        index = parentMenu.tabs.Count;
     }
 
     public override void draw(SpriteBatch b) {

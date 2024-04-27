@@ -9,10 +9,32 @@ using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 namespace TodoList.UI.Menus;
 
+public enum TabIconNames {
+    Fish,
+    Artifact,
+    Mineral,
+    Dish,
+    Crop,
+    Star,
+    Note,
+    Letter,
+};
+
 public class TodoMenu : IClickableMenu {
     private static readonly Size size = new(Game1.uiViewport.Width - 300, Game1.uiViewport.Height - 200);
     private static readonly Point tabDisplacementToOrigin = new(-TodoTab.tabSize.X, TodoTab.tabSize.Y);
     private static readonly Point itemsDisplacementToOrigin = new(40, 20);
+
+    public static readonly Dictionary<TabIconNames, Rectangle> TabIconsSourceRects = new() {
+        { TabIconNames.Fish,     new Rectangle(640, 64, 16, 16) },
+        { TabIconNames.Artifact, new Rectangle(656, 64, 16, 16) },
+        { TabIconNames.Mineral,  new Rectangle(672, 64, 16, 16) },
+        { TabIconNames.Dish,     new Rectangle(688, 64, 16, 16) },
+        { TabIconNames.Crop,     new Rectangle(640, 80, 16, 16) },
+        { TabIconNames.Star,     new Rectangle(656, 80, 16, 16) },
+        { TabIconNames.Note,     new Rectangle(672, 80, 16, 16) },
+        { TabIconNames.Letter,   new Rectangle(688, 80, 16, 16) },
+    };
 
     private Point tabAnchorPoint;
     private Point itemsAnchorPoint;
@@ -39,10 +61,10 @@ public class TodoMenu : IClickableMenu {
         tabAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + tabDisplacementToOrigin.X * (int)scale, yPositionOnScreen + spaceToClearTopBorder);
         itemsAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + itemsDisplacementToOrigin.X, yPositionOnScreen + spaceToClearTopBorder + itemsDisplacementToOrigin.Y);
 
-        tabs.Add(new TodoTab(
-            "1",
-            new Rectangle(tabAnchorPoint + new Point(0, TodoTab.tabSize.Y * tabs.Count).Multiply(scale), TodoTab.tabSize.Multiply(scale)),
-            "",
+        tabs.Add(new TodoTab(this, GetNewTabPosition(), "Fishing Task babeeey", TabIconNames.Fish));
+        for(int i = 0;  i < 8; i++) {
+            tabs[0].items.Add(new(tabs[0], $"Item {i}"));
+        }
             "Tab 1",
             Game1.mouseCursors,
             new Rectangle(688, 64, 16, 16),
@@ -57,10 +79,10 @@ public class TodoMenu : IClickableMenu {
         tabs[0].items.Add(new(tabs[0], "Item 6"));
         tabs[0].items.Add(new(tabs[0], "Item 7"));
 
-        tabs.Add(new TodoTab(
-            "2",
-            new Rectangle(tabAnchorPoint + new Point(0, TodoTab.tabSize.Y * tabs.Count).Multiply(scale), TodoTab.tabSize.Multiply(scale)),
-            "",
+        tabs.Add(new TodoTab(this, GetNewTabPosition(), "Crops I need to get", TabIconNames.Crop));
+        for (int i = 0; i < 3; i++) {
+            tabs[1].items.Add(new(tabs[0], $"Item {i}"));
+        }
             "Tab 2",
             Game1.mouseCursors,
             new Rectangle(688, 64, 16, 16),
@@ -121,9 +143,10 @@ public class TodoMenu : IClickableMenu {
             if (tab.containsPoint(x, y)) {
                 if (playSound) Game1.playSound("smallSelect");
 
-                currentTab.active = false;
-                tab.active = true;
-                currentTabIndex = i;
+                SetActiveTab(tab);
+
+                return;
+            }
             }
         }
 
@@ -166,6 +189,12 @@ public class TodoMenu : IClickableMenu {
 
             currentDisplacement += new Vector2(0, item.textSize.Y);
         }
+    }
+
+    private Vector2 GetNewTabPosition() {
+        return tabAnchorPoint.ToVector2() + new Vector2(0, TodoTab.tabSize.Y * TodoTab.Scale * tabs.Count);
+    }
+
     }
     #endregion
 }
