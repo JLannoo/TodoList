@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
 using StardewValley.Menus;
-using TodoList.Extensions;
 using TodoList.UI.Components;
 using xTile.Dimensions;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
@@ -21,6 +20,8 @@ public enum TabIconNames {
 };
 
 public class TodoMenu : IClickableMenu {
+    public  event EventHandler ListChange;
+
     private static readonly Size size = new(Game1.uiViewport.Width - 300, Game1.uiViewport.Height - 200);
     private static readonly Point tabDisplacementToOrigin = new(-TodoTab.tabSize.X, TodoTab.tabSize.Y);
     private static readonly Point itemsDisplacementToOrigin = new(40, 20);
@@ -39,12 +40,10 @@ public class TodoMenu : IClickableMenu {
     private Point tabAnchorPoint;
     private Point itemsAnchorPoint;
 
-    private string hoverText;
+    private string? hoverText;
 
-    public List<TodoTab> tabs = new();
     public CreateTab createTabButton;
 
-    public int currentTabIndex = 0;
     public TodoTab? currentTab;
 
     public TodoMenu(bool playOpeningSound = true)
@@ -58,32 +57,22 @@ public class TodoMenu : IClickableMenu {
             Game1.playSound("bigSelect");
         }
 
-        float scale = 4f;
-        tabAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + tabDisplacementToOrigin.X * (int)scale, yPositionOnScreen + spaceToClearTopBorder);
+        tabAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + tabDisplacementToOrigin.X * (int)TodoTab.Scale, yPositionOnScreen + spaceToClearTopBorder);
         itemsAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + itemsDisplacementToOrigin.X, yPositionOnScreen + spaceToClearTopBorder + itemsDisplacementToOrigin.Y);
-
-        tabs.Add(new TodoTab(this, GetNewTabPosition(), "Fishing Task babeeey", TabIconNames.Fish));
-        for(int i = 0;  i < 8; i++) {
-            tabs[0].items.Add(new(tabs[0], $"Item {i}"));
-        }
-
-        tabs.Add(new TodoTab(this, GetNewTabPosition(), "Crops I need to get", TabIconNames.Crop));
-        for (int i = 0; i < 3; i++) {
-            tabs[1].items.Add(new(tabs[0], $"Item {i}"));
-        }
 
         createTabButton = new CreateTab(GetNewTabPosition());
     }
 
     #region Methods
+    #region Overrides
     public override void draw(SpriteBatch b) {
         base.draw(b);
         Game1.drawDialogueBox(xPositionOnScreen, yPositionOnScreen, width, height, speaker: false, drawOnlyBox: true);
 
-        foreach (var tab in tabs) {
+        foreach (var tab in ModEntry.modData.tabs) {
             tab.draw(b);
 
-            if (tabs[currentTabIndex] == tab) {
+            if (ModEntry.modData.lastActiveTab == tab.index) {
                 tab.active = true;
                 currentTab = tab;
             }
@@ -119,8 +108,8 @@ public class TodoMenu : IClickableMenu {
     public override void receiveLeftClick(int x, int y, bool playSound = true) {
         base.receiveLeftClick (x, y, playSound);
 
-        for (var i = 0; i < tabs.Count; i++) {
-            var tab = tabs[i];
+        for (var i = 0; i < ModEntry.modData.tabs.Count; i++) {
+            var tab = ModEntry.modData.tabs[i];
 
             if (tab.containsPoint(x, y)) {
                 if (playSound) Game1.playSound("smallSelect");
@@ -137,6 +126,7 @@ public class TodoMenu : IClickableMenu {
             return;
         }
 
+        if (currentTab == null) return;
         foreach (TodoItem item in currentTab.items.ToList()) {
             item.receiveLeftClick(x, y);
         }
@@ -145,7 +135,7 @@ public class TodoMenu : IClickableMenu {
     public override void performHoverAction(int x, int y) {
         hoverText = "";
 
-        foreach (var tab in tabs) {
+        foreach (var tab in ModEntry.modData.tabs) {
             if (tab.containsPoint(x, y)) {
                 hoverText = tab.hoverText;
             }
@@ -161,7 +151,9 @@ public class TodoMenu : IClickableMenu {
             item.tryHover(x, y);
         }
     }
+    #endregion
 
+    #region Drawing
     private void DrawTitle(SpriteBatch b, string title, ref Vector2 currentDisplacement) {
         float titleHeight = Game1.dialogueFont.MeasureString(title).Y;
 
@@ -181,25 +173,32 @@ public class TodoMenu : IClickableMenu {
             currentDisplacement += new Vector2(0, item.textSize.Y);
         }
     }
+    #endregion
 
-    private Vector2 GetNewTabPosition() {
-        return tabAnchorPoint.ToVector2() + new Vector2(0, TodoTab.tabSize.Y * TodoTab.Scale * tabs.Count);
-    }
-
-    private void SetActiveTab(TodoTab tab) {
-        currentTab.active = false;
-        tab.active = true;
-        currentTabIndex = tab.index;
-    }
-
+    #region Events
     private void onCreateNewTab(string name, TabIconNames iconName) {
-        var tab = new TodoTab(this, GetNewTabPosition(), name, iconName);
-        tabs.Add(tab);
+        var tab = new TodoTab(GetNewTabPosition(), name, iconName);
+        ModEntry.modData.tabs.Add(tab);
 
         SetActiveTab(tab);
 
         createTabButton.setPosition(GetNewTabPosition());
         Game1.activeClickableMenu = ModEntry.menu;
+
+        ListChange.Invoke(this, EventArgs.Empty);
     }
+    #endregion
+
+    #region Utils
+    private Vector2 GetNewTabPosition() {
+        return tabAnchorPoint.ToVector2() + new Vector2(0, TodoTab.tabSize.Y * TodoTab.Scale * ModEntry.modData.tabs.Count);
+    }
+
+    private void SetActiveTab(TodoTab tab) {
+        if (currentTab != null) currentTab.active = false;
+        tab.active = true;
+        ModEntry.modData.lastActiveTab = tab.index;
+    }
+    #endregion
     #endregion
 }

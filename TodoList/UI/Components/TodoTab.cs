@@ -13,12 +13,12 @@ public class TodoTab : ClickableTextureComponent {
     public static readonly float Scale = 4f;
 
     public readonly List<TodoItem> items = new();
-    public readonly TodoMenu parentMenu;
     public readonly int index;
+    public readonly TabIconNames iconName;
 
     public bool active = false;
 
-    public TodoTab(TodoMenu parentMenu, Vector2 position, string name, TabIconNames icon)
+    public TodoTab(Vector2 position, string name, TabIconNames icon)
     : base(
         name,
         new Rectangle(position.ToPoint(), tabSize.Multiply(Scale)),
@@ -29,8 +29,24 @@ public class TodoTab : ClickableTextureComponent {
         Scale,
         drawShadow: true
     ) {
-        this.parentMenu = parentMenu;
-        index = parentMenu.tabs.Count;
+        index = ModEntry.modData.tabs.Count;
+        iconName = icon;
+    }
+
+    public TodoTab(SerializedTab tab)
+    : base(
+        tab.name,
+        new Rectangle(tab.position.ToPoint(), tabSize.Multiply(Scale)),
+        "",
+        tab.name,
+        Game1.mouseCursors,
+        TodoMenu.TabIconsSourceRects[tab.iconName],
+        Scale,
+        drawShadow: true
+    ) {
+        index = tab.index;
+        active = tab.active;
+        iconName = tab.iconName;
     }
 
     public override void draw(SpriteBatch b) {

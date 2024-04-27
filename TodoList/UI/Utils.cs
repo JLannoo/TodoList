@@ -1,5 +1,4 @@
 ﻿using StardewValley;
-using StardewModdingAPI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
