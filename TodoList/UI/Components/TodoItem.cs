@@ -24,7 +24,6 @@ public class TodoItem : ClickableTextureComponent {
     public Vector2 textPosition = Vector2.Zero;
 
     private Vector2 displacementForCheckbox = new(40, 0);
-    private TextInputMenu renamingMenu;
 
     public TodoItem(TodoTab tab, string text)
         : base(
@@ -44,8 +43,6 @@ public class TodoItem : ClickableTextureComponent {
 
         actions.Add(new HoverButton(onDeleteButtonClick, new(322, 498, 12, 12), 12, 2.5f));
         actions.Add(new HoverButton(onRenameButtonClick, new(32, 672, 16, 16), 12, 2f));
-
-        renamingMenu = new TextInputMenu(onNameChange, "Change", text);
     }
 
     #region Overrides
@@ -147,9 +144,7 @@ public class TodoItem : ClickableTextureComponent {
 
     private void onRenameButtonClick() {
         TextInputMenu menu = new(onNameChange, "Change", text);
-        menu.textBox.Selected = true;
-        Game1.activeClickableMenu = menu;
-        Game1.playSound("bigSelect");
+        menu.open();
     }
     #endregion
     #endregion

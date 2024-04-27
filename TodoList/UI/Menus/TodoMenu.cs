@@ -42,6 +42,7 @@ public class TodoMenu : IClickableMenu {
     private string hoverText;
 
     public List<TodoTab> tabs = new();
+    public CreateTab createTabButton;
 
     public int currentTabIndex = 0;
     public TodoTab? currentTab;
@@ -65,34 +66,13 @@ public class TodoMenu : IClickableMenu {
         for(int i = 0;  i < 8; i++) {
             tabs[0].items.Add(new(tabs[0], $"Item {i}"));
         }
-            "Tab 1",
-            Game1.mouseCursors,
-            new Rectangle(688, 64, 16, 16),
-            scale,
-            drawShadow: true
-        ));
-        tabs[0].items.Add(new(tabs[0], "Item 1"));
-        tabs[0].items.Add(new(tabs[0], "Item 2"));
-        tabs[0].items.Add(new(tabs[0], "Item 3"));
-        tabs[0].items.Add(new(tabs[0], "Item 4"));
-        tabs[0].items.Add(new(tabs[0], "Item 5"));
-        tabs[0].items.Add(new(tabs[0], "Item 6"));
-        tabs[0].items.Add(new(tabs[0], "Item 7"));
 
         tabs.Add(new TodoTab(this, GetNewTabPosition(), "Crops I need to get", TabIconNames.Crop));
         for (int i = 0; i < 3; i++) {
             tabs[1].items.Add(new(tabs[0], $"Item {i}"));
         }
-            "Tab 2",
-            Game1.mouseCursors,
-            new Rectangle(688, 64, 16, 16),
-            scale,
-            drawShadow: true
-        ));
-        tabs[1].items.Add(new(tabs[1], "Item 1"));
-        tabs[1].items.Add(new(tabs[1], "Item 2"));
-        tabs[1].items.Add(new(tabs[1], "Item 3"));
-        tabs[1].items.Add(new(tabs[1], "Item 4"));
+
+        createTabButton = new CreateTab(GetNewTabPosition());
     }
 
     #region Methods
@@ -108,6 +88,7 @@ public class TodoMenu : IClickableMenu {
                 currentTab = tab;
             }
         }
+        createTabButton.draw(b);
 
         if(currentTab != null) {
             var pendingItems = currentTab.items.FindAll(item => !item.completed);
@@ -147,7 +128,12 @@ public class TodoMenu : IClickableMenu {
 
                 return;
             }
-            }
+        }
+
+        if(createTabButton.containsPoint(x, y)) {
+            var menu = new TabCreationMenu(onCreateNewTab);
+            menu.open();
+            return;
         }
 
         foreach (TodoItem item in currentTab.items.ToList()) {
@@ -162,6 +148,10 @@ public class TodoMenu : IClickableMenu {
             if (tab.containsPoint(x, y)) {
                 hoverText = tab.hoverText;
             }
+        }
+        
+        if(createTabButton.containsPoint(x, y)) {
+            hoverText = createTabButton.hoverText;
         }
 
         if (currentTab == null) return;
@@ -195,6 +185,20 @@ public class TodoMenu : IClickableMenu {
         return tabAnchorPoint.ToVector2() + new Vector2(0, TodoTab.tabSize.Y * TodoTab.Scale * tabs.Count);
     }
 
+    private void SetActiveTab(TodoTab tab) {
+        currentTab.active = false;
+        tab.active = true;
+        currentTabIndex = tab.index;
+    }
+
+    private void onCreateNewTab(string name, TabIconNames iconName) {
+        var tab = new TodoTab(this, GetNewTabPosition(), name, iconName);
+        tabs.Add(tab);
+
+        SetActiveTab(tab);
+
+        createTabButton.setPosition(GetNewTabPosition());
+        Game1.activeClickableMenu = ModEntry.menu;
     }
     #endregion
 }
