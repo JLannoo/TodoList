@@ -42,7 +42,7 @@ public class TodoMenu : IClickableMenu {
 
     private string? hoverText;
 
-    public CreateTab createTabButton;
+    public CreateTabButton createTabButton;
 
     public TodoTab? currentTab;
 
@@ -60,7 +60,7 @@ public class TodoMenu : IClickableMenu {
         tabAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + tabDisplacementToOrigin.X * (int)TodoTab.Scale, yPositionOnScreen + spaceToClearTopBorder);
         itemsAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + itemsDisplacementToOrigin.X, yPositionOnScreen + spaceToClearTopBorder + itemsDisplacementToOrigin.Y);
 
-        createTabButton = new CreateTab(GetNewTabPosition());
+        createTabButton = new CreateTabButton(GetNewTabPosition());
     }
 
     #region Methods

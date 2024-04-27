@@ -5,11 +5,11 @@ using StardewValley.Menus;
 
 namespace TodoList.UI.Components;
 
-public class CreateTab : ClickableTextureComponent {
+public class CreateTabButton : ClickableTextureComponent {
     private static ClickableTextureComponent emptyTab;
     private static ClickableTextureComponent plusSign;
 
-    public CreateTab(Vector2 position) 
+    public CreateTabButton(Vector2 position) 
         : base(
             "CreateTab", 
             new Rectangle(position.ToPoint(), new Point(64)), 
