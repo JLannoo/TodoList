@@ -109,7 +109,8 @@ public class TodoMenu : IClickableMenu {
             }
         }
 
-        Utils.DrawTextWithBox(b, new Vector2(xPositionOnScreen + size.Width/2, yPositionOnScreen + spaceToClearTopBorder), currentTab.hoverText, Game1.dialogueFont, new Vector2(30, 15), true);
+        //Utils.DrawTextWithBox(b, new Vector2(xPositionOnScreen + size.Width/2, yPositionOnScreen + spaceToClearTopBorder), currentTab?.hoverText, Game1.dialogueFont, new Vector2(30, 15), true);
+        Utils.DrawTextWithScroll(b, new Vector2(xPositionOnScreen + size.Width / 2, yPositionOnScreen + spaceToClearTopBorder), currentTab?.hoverText, 20);
 
         drawMouse(b);
         drawHoverText(b, hoverText, Game1.smallFont);
