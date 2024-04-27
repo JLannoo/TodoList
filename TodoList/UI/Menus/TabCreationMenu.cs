@@ -6,11 +6,11 @@ using StardewValley.Menus;
 
 namespace TodoList.UI.Menus;
 
-public class TabCreationMenu : TextInputMenu {
+public delegate void doneCreatingTabBehavior(string name, TabIconNames iconName);
+
+public class TabCreationMenu : ExtendedTextInputMenu<doneCreatingTabBehavior> {
     // Override definition for doneNaming and make dummy callback for base class
-    public delegate void doneCreatingTabBehavior(string name, TabIconNames iconName);
     public new doneCreatingTabBehavior doneNaming;
-    private static doneNamingBehavior dummyCallback = (string str) => { };
 
     private List<ClickableTextureComponent> Icons = new();
     public ClickableTextureComponent selectedIcon;
@@ -19,7 +19,7 @@ public class TabCreationMenu : TextInputMenu {
 
     private ClickableTextureComponent selectionBox;
 
-    public TabCreationMenu(doneCreatingTabBehavior callback) : base(dummyCallback, "New Tab", "") {
+    public TabCreationMenu(doneCreatingTabBehavior callback) : base(callback, "New Tab") {
         doneNamingButton.setPosition(doneNamingButton.bounds.Location.ToVector2() + new Vector2(0, 100));
 
         doneNaming = callback;
@@ -51,7 +51,8 @@ public class TabCreationMenu : TextInputMenu {
             1.3f
         );
 
-        textBox.OnEnterPressed += textBoxEnter;
+        textBox.OnEnterPressed += onDoneCreating;
+        OnDoneButtonClicked += onDoneCreating;
     }
 
     public override void draw(SpriteBatch b) {
@@ -68,17 +69,6 @@ public class TabCreationMenu : TextInputMenu {
     }
 
     public override void receiveLeftClick(int x, int y, bool playSound = true) {
-        if(upperRightCloseButton.containsPoint(x,y)) {
-            Game1.activeClickableMenu = ModEntry.menu;
-            Game1.playSound("bigDeSelect");
-            return;
-        }
-
-        if(doneNamingButton.containsPoint(x,y)) {
-            textBoxEnter(textBox);
-            return;
-        }
-
         base.receiveLeftClick(x, y, playSound);
 
         for (var i = 0; i < Icons.Count; i++) {
@@ -93,8 +83,8 @@ public class TabCreationMenu : TextInputMenu {
         }
     }
 
-    new public void textBoxEnter(TextBox sender) {
-        if(sender.Text.Length >= minLength) {
+    public void onDoneCreating(TextBox sender) {
+        if (sender.Text.Length >= minLength) {
             doneNaming(sender.Text, Utils.GetEnumFromString<TabIconNames>(selectedIcon.name));
             Game1.playSound("bigSelect");
         }
