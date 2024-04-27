@@ -3,6 +3,7 @@ using StardewModdingAPI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
+using StardewValley.BellsAndWhistles;
 
 namespace TodoList.UI;
 
@@ -32,4 +33,7 @@ public static class Utils {
         SpriteText.drawStringWithScrollCenteredAt(b, text, x, y, width, scrollType: 0);
     }
 
+    public static T GetEnumFromString<T>(string name) {
+        return (T)Enum.Parse(typeof(T), name);
+    }
 }

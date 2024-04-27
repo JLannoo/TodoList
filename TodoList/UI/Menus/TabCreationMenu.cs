@@ -95,7 +95,7 @@ public class TabCreationMenu : TextInputMenu {
 
     new public void textBoxEnter(TextBox sender) {
         if(sender.Text.Length >= minLength) {
-            doneNaming(sender.Text, (TabIconNames)Enum.Parse(typeof(TabIconNames), selectedIcon.name));
+            doneNaming(sender.Text, Utils.GetEnumFromString<TabIconNames>(selectedIcon.name));
             Game1.playSound("bigSelect");
         }
     }
