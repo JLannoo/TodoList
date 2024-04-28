@@ -6,7 +6,7 @@ using StardewValley.Menus;
 namespace TodoList.UI.Menus;
 
 public class TextInputMenu : NamingMenu {
-    public TextInputMenu(doneNamingBehavior callback, string title, string defaultName = null) : base(callback, title, defaultName) {
+    public TextInputMenu(doneNamingBehavior callback, string title, string defaultName = "") : base(callback, title, defaultName) {
         textBox.Width = Game1.uiViewport.Width/2;
         textBox.Selected = false;
         textBox.limitWidth = false;
@@ -39,5 +39,13 @@ public class TextInputMenu : NamingMenu {
         base.draw(b);
         upperRightCloseButton.draw(b);
         drawMouse(b);
+    }
+
+    public override void releaseLeftClick(int x, int y) {
+        base.releaseLeftClick(x, y);
+
+        if(upperRightCloseButton.containsPoint(x, y)) {
+            Game1.activeClickableMenu = ModEntry.menu;
+        }
     }
 }

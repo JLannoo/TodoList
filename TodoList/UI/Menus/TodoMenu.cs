@@ -43,6 +43,8 @@ public class TodoMenu : IClickableMenu {
     private string? hoverText;
 
     public CreateTabButton createTabButton;
+    public ClickableTextureComponent deleteTabButton;
+    public ClickableTextureComponent createItemButton;
 
     public TodoTab? currentTab;
 
@@ -61,6 +63,26 @@ public class TodoMenu : IClickableMenu {
         itemsAnchorPoint = new(xPositionOnScreen + spaceToClearSideBorder + itemsDisplacementToOrigin.X, yPositionOnScreen + spaceToClearTopBorder + itemsDisplacementToOrigin.Y);
 
         createTabButton = new CreateTabButton(GetNewTabPosition());
+
+        deleteTabButton = new ClickableTextureComponent(
+            "Delete Tab",
+            new Rectangle(xPositionOnScreen + size.Width - 128, yPositionOnScreen + size.Height - 128, 64, 64),
+            "",
+            "Delete tab",
+            Game1.mouseCursors,
+            new(320, 496, 16, 16),
+            4f
+        );
+
+        createItemButton = new ClickableTextureComponent(
+            "Create Item",
+            new Rectangle(xPositionOnScreen + size.Width - 200, yPositionOnScreen + size.Height - 128, 64, 64),
+            "",
+            "Create new item",
+            Game1.mouseCursors,
+            new Rectangle(0, 410, 16, 16),
+            4f
+        );
     }
 
     #region Methods
@@ -69,7 +91,7 @@ public class TodoMenu : IClickableMenu {
         base.draw(b);
         Game1.drawDialogueBox(xPositionOnScreen, yPositionOnScreen, width, height, speaker: false, drawOnlyBox: true);
 
-        foreach (var tab in ModEntry.modData.tabs) {
+        foreach (var tab in ModEntry.modData.tabs.ToList()) {
             tab.draw(b);
 
             if (ModEntry.modData.lastActiveTab == tab.index) {
@@ -96,10 +118,14 @@ public class TodoMenu : IClickableMenu {
                 DrawTitle(b, "Completed", ref currentDisplacement);
                 DrawItems(b, completedItems, ref currentDisplacement);
             }
+
+            deleteTabButton.draw(b);
+            createItemButton.draw(b);
+
         }
 
         //Utils.DrawTextWithBox(b, new Vector2(xPositionOnScreen + size.Width/2, yPositionOnScreen + spaceToClearTopBorder), currentTab?.hoverText, Game1.dialogueFont, new Vector2(30, 15), true);
-        Utils.DrawTextWithScroll(b, new Vector2(xPositionOnScreen + size.Width / 2, yPositionOnScreen + spaceToClearTopBorder), currentTab?.hoverText, 20);
+        Utils.DrawTextWithScroll(b, new Vector2(xPositionOnScreen + size.Width / 2, yPositionOnScreen + spaceToClearTopBorder), currentTab?.hoverText ?? "No tabs yet...", 20);
 
         drawMouse(b);
         drawHoverText(b, hoverText, Game1.smallFont);
@@ -126,6 +152,17 @@ public class TodoMenu : IClickableMenu {
             return;
         }
 
+        if (createItemButton.containsPoint(x, y)) {
+            var menu = new TextInputMenu(onCreateItem, "Create Item");
+            menu.open();
+            return;
+        }
+
+        if (deleteTabButton.containsPoint(x, y)) {
+            onTabDelete();
+            return;
+        }
+
         if (currentTab == null) return;
         foreach (TodoItem item in currentTab.items.ToList()) {
             item.receiveLeftClick(x, y);
@@ -143,6 +180,15 @@ public class TodoMenu : IClickableMenu {
         
         if(createTabButton.containsPoint(x, y)) {
             hoverText = createTabButton.hoverText;
+        }
+
+        if(deleteTabButton.containsPoint(x, y)) {
+            hoverText = deleteTabButton.hoverText;
+        }
+
+        if(createItemButton.containsPoint(x, y)) {
+            hoverText = createItemButton.hoverText;
+            createItemButton.tryHover(x, y);
         }
 
         if (currentTab == null) return;
@@ -187,6 +233,27 @@ public class TodoMenu : IClickableMenu {
 
         ListChange.Invoke(this, EventArgs.Empty);
     }
+
+    private void onCreateItem(string name) {
+        var item = new TodoItem(currentTab, name);
+        currentTab.items.Add(item);
+
+        Game1.activeClickableMenu = ModEntry.menu;
+
+        ListChange.Invoke(this, EventArgs.Empty);
+    }
+
+    private void onTabDelete() {
+        TodoTab? previousTab = ModEntry.modData.tabs.Find(tab => tab.index == currentTab.index - 1);
+        TodoTab? firstTab = ModEntry.modData.tabs.First();
+
+        ModEntry.modData.tabs.Remove(currentTab);
+
+        TodoTab? activeTab = previousTab ?? null;
+
+        SetActiveTab(activeTab);
+        RefreshTabsPositions();
+    }
     #endregion
 
     #region Utils
@@ -194,7 +261,21 @@ public class TodoMenu : IClickableMenu {
         return tabAnchorPoint.ToVector2() + new Vector2(0, TodoTab.tabSize.Y * TodoTab.Scale * ModEntry.modData.tabs.Count);
     }
 
-    private void SetActiveTab(TodoTab tab) {
+    private void RefreshTabsPositions() {
+        for (int i = 0; i < ModEntry.modData.tabs.Count; i++) {
+            var tab = ModEntry.modData.tabs[i];
+            tab.setPosition(GetNewTabPosition());
+        }
+        createTabButton.setPosition(GetNewTabPosition());
+    }
+
+    private void SetActiveTab(TodoTab? tab) {
+        if(tab == null) {
+            currentTab = null;
+            ModEntry.modData.lastActiveTab = 0;
+            return;
+        }
+
         if (currentTab != null) currentTab.active = false;
         tab.active = true;
         ModEntry.modData.lastActiveTab = tab.index;

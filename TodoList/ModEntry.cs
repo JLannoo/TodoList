@@ -24,13 +24,25 @@ internal class ModEntry : Mod {
     #region Events
     private void OnButtonPressed(object? sender, StardewModdingAPI.Events.ButtonPressedEventArgs e) {
         if (Context.IsWorldReady && e.Button == SButton.L) {
-            if (Game1.activeClickableMenu is TodoMenu) {
-                menu?.exitThisMenu();
-                menu.ListChange -= OnListChange;
-            } else {
-                menu = new TodoMenu();
-                menu.ListChange += OnListChange;
-                Game1.activeClickableMenu = menu;
+            if(Game1.activeClickableMenu != null) {
+                var a = Game1.activeClickableMenu.GetType();
+            }
+
+            switch (Game1.activeClickableMenu) {
+                case TodoMenu:
+                    menu?.exitThisMenu();
+                    menu.ListChange -= OnListChange;
+                    break;
+
+                case TabCreationMenu:
+                case TextInputMenu:
+                    break;
+
+                default:
+                    menu = new TodoMenu();
+                    menu.ListChange += OnListChange;
+                    Game1.activeClickableMenu = menu;
+                    break;
             }
         }
     }
